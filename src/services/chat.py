@@ -1,7 +1,9 @@
 import json
 
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import WebSocket
+from fastapi import WebSocket, HTTPException
+from starlette import status
 from starlette.websockets import WebSocketDisconnect
 
 from src.api.schemas.chat import (
@@ -52,7 +54,8 @@ class ChatService:
             members = await user_repo.get_users_by_ids(data.members)
 
             if not user:
-                raise Exception("User not found")
+                logger.error("User not found")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
 
             group_repo = GroupRepository(self.session)
             await group_repo.create_group(data.group_name, user, members)
@@ -71,6 +74,7 @@ class ChatService:
 
             if not chat:
                 await websocket.send_text(json.dumps({"error": "Chat not found"}))
+                logger.error("Chat not found")
                 await websocket.close()
                 return
 
@@ -82,6 +86,7 @@ class ChatService:
                     await websocket.send_text(
                         json.dumps({"error": "Invalid JSON format"})
                     )
+                    logger.error("Invalid JSON format")
                     continue
 
                 if text := data.get("text"):

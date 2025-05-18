@@ -1,4 +1,5 @@
 from fastapi.security import OAuth2PasswordRequestForm
+from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from starlette import status
@@ -22,6 +23,7 @@ class UserService:
         user_repo = UserRepository(self.session)
         user = await user_repo.get_user_by_email(form_data.username)
         if not user or not verify_password(form_data.password, user.password):
+            logger.error("Invalid credentials")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
             )
