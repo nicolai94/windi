@@ -46,7 +46,6 @@ class MessageRepository(BaseRepository[Message]):
                 self.model.sender_id != user_id,
             )
             .values(**data)
-            .returning(self.model)
         )
 
         try:
