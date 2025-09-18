@@ -21,6 +21,10 @@ def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
 
+def test():
+    print("hello")
+
+
 def hash_password(password):
     return pwd_context.hash(password)
 
